@@ -6,9 +6,263 @@ output: "github_document"
 ---
 
 ```{r}
+library(psych)
 library(haven)
 library(dplyr)
 library(ggplot2)
+
+```
+
+#dataset
+```{r}
+load("C:/Users/vtrip/OneDrive/Desktop/ICPSR_38964/DS0001/38964-0001-Data.rda")
+```
+
+```{r}
+new_dataset <- da38964.0001 %>%
+  select(RES1, RES2, RES3, RES4, RES5, RES5, RES6, SAT1, SAT2, SAT3, SAT4, SAT5, SEX, LAD_NOW, LAD_FUT)
+
+
+  new_dataset$RES1 <- as.numeric(new_dataset$RES1)
+  describe(new_dataset$RES1)
+  new_dataset <- new_dataset %>%
+  filter(RES1 < 6)
+  summary(new_dataset$RES1)
+```
+
+
+```{r}
+new_dataset<- new_dataset %>%
+  mutate(gender_recode = case_when(
+    SEX == "(1) Male" ~  '1',
+    SEX == "(2) Female" ~ "2"
+    ))
+
+```
+
+
+```{r}
+new_dataset$RES1 <- as.numeric(new_dataset$RES1)
+  
+#describe(new_dataset$RES1)
+#summary(new_dataset$RES1)
+  
+new_dataset <- new_dataset %>%
+  filter(RES1 < 6)
+
+new_dataset$RES2 <- as.numeric(new_dataset$RES2)
+  
+
+new_dataset <- new_dataset %>%
+  filter(RES2 < 6)
+
+#describe(new_dataset$RES2)  
+#summary(new_dataset$RES2)
+
+new_dataset$RES3 <- as.numeric(new_dataset$RES3)
+  
+new_dataset <- new_dataset %>%
+  filter(RES3 < 6)
+
+#describe(new_dataset$RES3)  
+#summary(new_dataset$RES3)
+
+new_dataset$RES4 <- as.numeric(new_dataset$RES4)
+  
+new_dataset <- new_dataset %>%
+  filter(RES4 < 6)
+
+#describe(new_dataset$RES4)  
+#summary(new_dataset$RES4)
+
+new_dataset$RES5 <- as.numeric(new_dataset$RES5)
+  
+new_dataset <- new_dataset %>%
+  filter(RES5 < 6)
+
+#describe(new_dataset$RES5)  
+#summary(new_dataset$RES5)
+
+new_dataset$RES6 <- as.numeric(new_dataset$RES6)
+  
+new_dataset <- new_dataset %>%
+  filter(RES6 < 6)
+
+#describe(new_dataset$RES6)  
+#summary(new_dataset$RES6)
+
+new_dataset$SAT1 <- as.numeric(new_dataset$SAT1)
+  
+new_dataset <- new_dataset %>%
+  filter(SAT1 < 6)
+
+#describe(new_dataset$SAT1)  
+#summary(new_dataset$SAT1)
+
+new_dataset$SAT2 <- as.numeric(new_dataset$SAT2)
+  
+new_dataset <- new_dataset %>%
+  filter(SAT2 < 6)
+
+#describe(new_dataset$SAT2)  
+#summary(new_dataset$SAT2)
+
+new_dataset$SAT3 <- as.numeric(new_dataset$SAT3)
+  
+new_dataset <- new_dataset %>%
+  filter(SAT3 < 6)
+
+#describe(new_dataset$SAT3)  
+#summary(new_dataset$SAT3)
+
+new_dataset$SAT4 <- as.numeric(new_dataset$SAT4)
+  
+new_dataset <- new_dataset %>%
+  filter(SAT4 < 6)
+
+#describe(new_dataset$SAT4)  
+#summary(new_dataset$SAT4)
+
+new_dataset$SAT5 <- as.numeric(new_dataset$SAT5)
+  
+new_dataset <- new_dataset %>%
+  filter(SAT5 < 6)
+
+#describe(new_dataset$SAT5)  
+#summary(new_dataset$SAT5)
+
+new_dataset$LAD_NOW <- as.numeric(new_dataset$LAD_NOW)
+  
+new_dataset <- new_dataset %>%
+  filter(LAD_NOW < 11)
+
+#describe(new_dataset$LAD_NOW)  
+#summary(new_dataset$LAD_NOW)
+
+new_dataset$LAD_FUT <- as.numeric(new_dataset$LAD_FUT)
+  
+new_dataset <- new_dataset %>%
+  filter(LAD_FUT < 11)
+
+#describe(new_dataset$LAD_FUT)  
+#summary(new_dataset$LAD_FUT)
+
+#code to calculate social ladder variable
+new_dataset$MOB_EXPECT<- new_dataset$LAD_FUT - new_dataset$LAD_NOW
+
+```  
+```{r}
+#composite variables
+
+new_dataset <- new_dataset %>%
+  mutate(RES = round(rowMeans(cbind(RES1, RES2, RES3, RES4, RES5, RES6)), 1))
+
+new_dataset <- new_dataset %>%
+  mutate(SAT = round(rowMeans(cbind(SAT1, SAT2, SAT3, SAT4, SAT5)), 2))
+
+```
+```{r}
+
+#summary descriptive statistics
+
+new_dataset %>% 
+  group_by(SEX) %>%
+  dplyr::summarize(
+      mean_RES   = mean(RES),
+      mean_SAT    = mean(SAT),
+      std_dev_RES = sd(RES),
+      std_dev_SAT = sd(SAT),
+      corr_RES_SAT  = cor(RES, SAT)
+)
+
+#Weak positive correlation between resilience and satisfaction when grouped by sex, where the correlation is slightly stronger in females. 
+```
+```{r}
+#data distribution visualization
+
+
+ggplot(new_dataset, aes(x = SEX, y = RES)) + geom_violin(aes(fill=SEX)) + scale_fill_manual(values = c("Male" = "blue", "Female" = "pink")) + theme_classic()
+
+ggplot(new_dataset, aes(x = SEX, y = SAT)) + geom_violin(aes(fill=SEX)) + scale_fill_manual(values = c("Male" = "blue", "Female" = "pink")) + theme_classic()
+```
+```{r}
+
+violinBy(SAT ~ SEX, data = new_dataset, rain= TRUE, vertical = FALSE)
+
+```
+```{r}
+
+
+ggplot(new_dataset, aes(x = RES)) + geom_histogram(binwidth = 0.1) + theme_classic()
+
+ggplot(new_dataset, aes(x = SAT)) + geom_histogram(binwidth = 0.1) + theme_classic()
+
+```
+```{r}
+
+#Normality test for SAT, Shapiro
+
+#shapiro.test(new_dataset$SAT)
+
+#shapiro.test(new_dataset$RES)
+
+```
+```{r}
+new_dataset$SAT_log <- log10(new_dataset$SAT)
+
+ggplot(new_dataset, aes(x = SAT_log)) + geom_histogram(binwidth = 0.05) + theme_classic()
+
+new_dataset$RES_log <- log10(new_dataset$RES)
+
+ggplot(new_dataset, aes(x = RES_log)) + geom_histogram(binwidth = 0.05) + theme_classic()
+
+
+
+```
+```{r}
+
+#shapiro.test(new_dataset$SAT_log)
+#shapiro.test(new_dataset$RES_log)
+
+#Based on the original histograms, RES seemed normal & SAT did not. Based on the S-W normality test, both were non-normal. Remained so depite log transformation
+
+```
+```{r}
+ggplot(new_dataset, aes(x = SEX, y = SAT)) +
+  geom_boxplot(aes(fill = SEX)) +
+  theme_minimal() +
+  labs(title = "Boxplot of SAT Scores by Sex", x = "Sex", y = "SAT Scores")
+```
+
+```{r}
+#variance by group for variables RES & SAT
+
+var(new_dataset$RES)
+
+new_dataset %>%
+  group_by(SEX) %>%
+  summarize(Variance = var(RES))
+
+var(new_dataset$SAT)
+
+new_dataset %>%
+  group_by(SEX) %>%
+  summarize(Variance = var(SAT))
+```
+
+```{r}
+ggplot(new_dataset, aes(x = SEX, y = MOB_EXPECT)) +
+  geom_boxplot(aes(fill = SEX)) +
+  theme_minimal() +
+  labs(title = "MOB_EXPECT by SEX", x = "Sex", y = "MOB_EXPECT")
+```
+
+```{r}
+correlation <- cor(new_dataset$MOB_EXPECT, new_dataset$SAT, use = "complete.obs")
+
+print(correlation)
+
+#counterintuitively, there seems to be a negative correlation between life satisfaction and expecttions of mobility. 
 
 ```
 
