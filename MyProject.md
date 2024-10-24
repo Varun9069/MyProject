@@ -73,11 +73,6 @@ library(bruceR)
 ``` r
 library(performance)
 library(sjPlot)
-```
-
-    ## Learn more about sjPlot with 'browseVignettes("sjPlot")'.
-
-``` r
 library(ggstatsplot)
 ```
 
@@ -710,3 +705,18 @@ ggplot(plot, aes(x = SAT_composite, y = MOB_EXPECT)) +
     ## `geom_smooth()` using formula = 'y ~ x'
 
 ![](MyProject_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+
+``` r
+plot<-summarySE(new_dataset, measurevar="MOB_EXPECT", groupvars=c("SEX", "RES_composite"))
+```
+
+    ## Warning in qt(conf.interval/2 + 0.5, datac$N - 1): NaNs produced
+
+``` r
+ggplot(plot, aes(x = RES_composite, y = MOB_EXPECT)) +
+  geom_smooth(method = lm) + geom_point() + facet_wrap(~ SEX) + theme_bruce()
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+![](MyProject_files/figure-gfm/unnamed-chunk-21-2.png)<!-- -->
