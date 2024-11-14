@@ -15,6 +15,7 @@ library(performance)
 library(sjPlot)
 library(ggstatsplot)
 library(Rmisc)
+library(tidyverse)
 
 ```
 
@@ -55,6 +56,7 @@ new_dataset$RES1 <- as.numeric(new_dataset$RES1)
 
 #describe(new_dataset$RES1)
 #summary(new_dataset$RES1)
+
   
 new_dataset <- new_dataset %>%
   filter(RES1 < 6)
@@ -64,6 +66,10 @@ new_dataset$RES2 <- as.numeric(new_dataset$RES2)
 
 new_dataset <- new_dataset %>%
   filter(RES2 < 6)
+
+
+
+new_dataset$RES2_R <- 6 - new_dataset$RES2
 
 #describe(new_dataset$RES2)  
 #summary(new_dataset$RES2)
@@ -81,6 +87,8 @@ new_dataset$RES4 <- as.numeric(new_dataset$RES4)
 new_dataset <- new_dataset %>%
   filter(RES4 < 6)
 
+new_dataset$RES4_R <- 6 - new_dataset$RES4
+
 #describe(new_dataset$RES4)  
 #summary(new_dataset$RES4)
 
@@ -96,6 +104,8 @@ new_dataset$RES6 <- as.numeric(new_dataset$RES6)
   
 new_dataset <- new_dataset %>%
   filter(RES6 < 6)
+
+new_dataset$RES6_R <- 6 - new_dataset$RES6
 
 #describe(new_dataset$RES6)  
 #summary(new_dataset$RES6)
@@ -171,7 +181,7 @@ new_dataset$MOB_EXPECT<- new_dataset$LAD_FUT - new_dataset$LAD_NOW
   #mutate(SAT = rbind(rowMeans(cbind(SAT1, SAT2, SAT3, SAT4, SAT5))))
 
 new_dataset <- new_dataset %>%
-  mutate(RES_composite = rowMeans(cbind(RES1, RES2, RES3, RES4, RES5, RES6)))
+  mutate(RES_composite = rowMeans(cbind(RES1, RES2_R, RES3, RES4_R, RES5, RES6_R)))
 
 new_dataset <- new_dataset %>%
   mutate(SAT_composite = rowMeans(cbind(SAT1, SAT2, SAT3, SAT4, SAT5)))
@@ -266,7 +276,10 @@ new_dataset %>%
   #summarize(Variance = var(RES))
 
 #var(new_dataset$SAT)
+```
 
+
+```{r}
 #new_dataset %>%
  # group_by(SEX) %>%
   #summarize(Variance = var(SAT))
@@ -334,5 +347,16 @@ plot<-summarySE(new_dataset, measurevar="MOB_EXPECT", groupvars=c("SEX", "RES_co
 ggplot(plot, aes(x = RES_composite, y = MOB_EXPECT)) +
   geom_smooth(method = lm) + geom_point() + facet_wrap(~ SEX) + theme_bruce()
 
+```
+
+```{r}
+Alpha(da38964.0001, "SAT", c("1", "2", "3", "4", "5"))
+
+Alpha(da38964.0001, "RES", 1:6, rev = c("RES2", "RES4", "RES6"))
+```
+```{r}
+EFA(da38964.0001, "SAT", 1:5, method = "pa", plot.scree = TRUE, nfactors = c("parallel"))
+
+EFA(da38964.0001, "RES", 1:6, rev = c("RES2", "RES4", "RES6"), method = "pa", plot.scree = TRUE, nfactors = c("parallel"))
 ```
 
