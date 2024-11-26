@@ -73,6 +73,11 @@ library(bruceR)
 ``` r
 library(performance)
 library(sjPlot)
+```
+
+    ## #refugeeswelcome
+
+``` r
 library(ggstatsplot)
 ```
 
@@ -157,22 +162,14 @@ load("C:/Users/vtrip/OneDrive/Desktop/ICPSR_38964/DS0001/38964-0001-Data.rda")
 ``` r
 new_dataset <- da38964.0001 %>%
   select(RES1, RES2, RES3, RES4, RES5, RES5, RES6, SAT1, SAT2, SAT3, SAT4, SAT5, SEX, LAD_NOW, LAD_FUT)
+
+summary(new_dataset$SEX)
 ```
 
-``` r
-#new_dataset<- new_dataset %>%
-#  mutate(gender_recode = case_when(
-#    SEX == "(1) Male" ~  '1',
-#    SEX == "(2) Female" ~ "2"
-#    ))
-```
+    ##   (1) Male (2) Female  (3) Other 
+    ##       3652       3957         35
 
 ``` r
-new_dataset$SEX <- as.numeric(new_dataset$SEX)
-
-new_dataset <- new_dataset %>%
-  filter(SEX < 3)
-
 new_dataset$RES1 <- as.numeric(new_dataset$RES1)
   
 
@@ -323,11 +320,12 @@ new_dataset %>%
 )
 ```
 
-    ## # A tibble: 2 × 6
-    ##     SEX mean_RES mean_SAT std_dev_RES std_dev_SAT corr_RES_SAT
-    ##   <dbl>    <dbl>    <dbl>       <dbl>       <dbl>        <dbl>
-    ## 1     1     3.30     2.94       0.822       0.964        0.464
-    ## 2     2     3.08     2.91       0.823       0.939        0.406
+    ## # A tibble: 3 × 6
+    ##   SEX        mean_RES mean_SAT std_dev_RES std_dev_SAT corr_RES_SAT
+    ##   <fct>         <dbl>    <dbl>       <dbl>       <dbl>        <dbl>
+    ## 1 (1) Male       3.30     2.94       0.822       0.964        0.464
+    ## 2 (2) Female     3.08     2.91       0.823       0.939        0.406
+    ## 3 (3) Other      2.5      2.43       0.877       1.09         0.330
 
 ``` r
 #Weak positive correlation between resilience and satisfaction when grouped by sex, where the correlation is slightly stronger in females. 
@@ -431,19 +429,21 @@ new_dataset <- new_dataset %>%
 Corr(new_dataset)
 ```
 
+    ## NOTE: `SEX` transformed to numeric.
+    ## 
     ## Pearson's r and 95% confidence intervals:
     ## ────────────────────────────────────────────────────────────────
     ##                                  r       [95% CI]     p        N
     ## ────────────────────────────────────────────────────────────────
-    ## SAT_composite-MOB_EXPECT     -0.22 [-0.24, -0.19] <.001 *** 5635
-    ## SAT_composite-RES_composite   0.43 [ 0.41,  0.45] <.001 *** 5635
-    ## SAT_composite-SEX            -0.02 [-0.04,  0.01]  .180     5635
-    ## MOB_EXPECT-RES_composite     -0.09 [-0.11, -0.06] <.001 *** 5635
-    ## MOB_EXPECT-SEX                0.10 [ 0.07,  0.12] <.001 *** 5635
-    ## RES_composite-SEX            -0.13 [-0.16, -0.11] <.001 *** 5635
+    ## SAT_composite-MOB_EXPECT     -0.22 [-0.24, -0.19] <.001 *** 5666
+    ## SAT_composite-RES_composite   0.43 [ 0.41,  0.45] <.001 *** 5666
+    ## SAT_composite-SEX            -0.03 [-0.05,  0.00]  .054 .   5666
+    ## MOB_EXPECT-RES_composite     -0.09 [-0.11, -0.06] <.001 *** 5666
+    ## MOB_EXPECT-SEX                0.10 [ 0.07,  0.12] <.001 *** 5666
+    ## RES_composite-SEX            -0.14 [-0.17, -0.12] <.001 *** 5666
     ## ────────────────────────────────────────────────────────────────
 
-![](MyProject_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](MyProject_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
     ## Correlation matrix is displayed in the RStudio `Plots` Pane.
 
@@ -451,17 +451,17 @@ Corr(new_dataset)
 ggcorrmat(new_dataset)
 ```
 
-![](MyProject_files/figure-gfm/unnamed-chunk-19-2.png)<!-- -->
+![](MyProject_files/figure-gfm/unnamed-chunk-18-2.png)<!-- -->
 
 ``` r
 #Multiple regression
 
-model<-lm(MOB_EXPECT ~ SEX + SAT_composite + RES_composite, data = new_dataset)
+model<-lm(MOB_EXPECT ~ SAT_composite + RES_composite, data = new_dataset)
 
 check_model(model)
 ```
 
-![](MyProject_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](MyProject_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 ``` r
 model_summary(model)
@@ -473,18 +473,16 @@ model_summary(model)
     ## ─────────────────────────────
     ##                (1) MOB_EXPECT
     ## ─────────────────────────────
-    ## (Intercept)       2.159 ***  
-    ##                  (0.128)     
-    ## SEX               0.339 ***  
-    ##                  (0.047)     
-    ## SAT_composite    -0.426 ***  
+    ## (Intercept)       2.753 ***  
+    ##                  (0.099)     
+    ## SAT_composite    -0.413 ***  
     ##                  (0.027)     
-    ## RES_composite     0.053      
+    ## RES_composite     0.016      
     ##                  (0.031)     
     ## ─────────────────────────────
-    ## R^2               0.056      
-    ## Adj. R^2          0.056      
-    ## Num. obs.      5635          
+    ## R^2               0.047      
+    ## Adj. R^2          0.047      
+    ## Num. obs.      5666          
     ## ─────────────────────────────
     ## Note. * p < .05, ** p < .01, *** p < .001.
     ## 
@@ -493,9 +491,8 @@ model_summary(model)
     ## Low Correlation
     ## 
     ##           Term  VIF   VIF 95% CI Increased SE Tolerance Tolerance 95% CI
-    ##            SEX 1.02 [1.01, 1.08]         1.01      0.98     [0.93, 0.99]
-    ##  SAT_composite 1.23 [1.20, 1.27]         1.11      0.81     [0.78, 0.83]
-    ##  RES_composite 1.26 [1.22, 1.30]         1.12      0.80     [0.77, 0.82]
+    ##  SAT_composite 1.23 [1.20, 1.27]         1.11      0.81     [0.79, 0.84]
+    ##  RES_composite 1.23 [1.20, 1.27]         1.11      0.81     [0.79, 0.84]
 
 ``` r
 tab_model(model)
@@ -529,24 +526,10 @@ p
 (Intercept)
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-2.16
+2.75
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-1.91 – 2.41
-</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-<strong>\<0.001</strong>
-</td>
-</tr>
-<tr>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
-SEX
-</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.34
-</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.25 – 0.43
+2.56 – 2.95
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 <strong>\<0.001</strong>
@@ -557,10 +540,10 @@ SEX
 SAT composite
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.43
+-0.41
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.48 – -0.37
+-0.47 – -0.36
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 <strong>\<0.001</strong>
@@ -571,13 +554,13 @@ SAT composite
 RES composite
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.05
+0.02
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
--0.01 – 0.11
+-0.04 – 0.08
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-0.089
+0.606
 </td>
 </tr>
 <tr>
@@ -585,7 +568,7 @@ RES composite
 Observations
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="3">
-5635
+5666
 </td>
 </tr>
 <tr>
@@ -593,7 +576,7 @@ Observations
 R<sup>2</sup> / R<sup>2</sup> adjusted
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
-0.056 / 0.056
+0.047 / 0.047
 </td>
 </tr>
 </table>
@@ -602,7 +585,7 @@ R<sup>2</sup> / R<sup>2</sup> adjusted
 plot_model(model,  type ="est",  show.values = TRUE, vline.color = "#1B191999", line.size = 1.5, dot.size = 2.5, colors = "blue") + theme_bruce()
 ```
 
-![](MyProject_files/figure-gfm/unnamed-chunk-20-2.png)<!-- -->
+![](MyProject_files/figure-gfm/unnamed-chunk-19-2.png)<!-- -->
 
 ``` r
 #moderation effect of GENDER on correlation between SAT_composite and MOB_expect
@@ -637,29 +620,33 @@ PROCESS(new_dataset, y = "MOB_EXPECT", x = "SAT_composite", mods = c("SEX"))
     ##   
     ## Model Summary
     ## 
-    ## ─────────────────────────────────────────────────
-    ##                    (1) MOB_EXPECT  (2) MOB_EXPECT
-    ## ─────────────────────────────────────────────────
-    ## (Intercept)           1.593 ***       1.591 ***  
-    ##                      (0.023)         (0.023)     
-    ## SAT_composite        -0.409 ***      -0.408 ***  
-    ##                      (0.024)         (0.024)     
-    ## SEX                                   0.328 ***  
-    ##                                      (0.046)     
-    ## SAT_composite:SEX                    -0.126 **   
-    ##                                      (0.049)     
-    ## ─────────────────────────────────────────────────
-    ## R^2                   0.047           0.057      
-    ## Adj. R^2              0.047           0.056      
-    ## Num. obs.          5635            5635          
-    ## ─────────────────────────────────────────────────
+    ## ───────────────────────────────────────────────────────────
+    ##                              (1) MOB_EXPECT  (2) MOB_EXPECT
+    ## ───────────────────────────────────────────────────────────
+    ## (Intercept)                     1.596 ***       1.425 ***  
+    ##                                (0.023)         (0.033)     
+    ## SAT_composite                  -0.407 ***      -0.343 ***  
+    ##                                (0.024)         (0.034)     
+    ## SEX(2) Female                                   0.328 ***  
+    ##                                                (0.046)     
+    ## SEX(3) Other                                    0.798 *    
+    ##                                                (0.345)     
+    ## SAT_composite:SEX(2) Female                    -0.126 **   
+    ##                                                (0.049)     
+    ## SAT_composite:SEX(3) Other                      0.405      
+    ##                                                (0.292)     
+    ## ───────────────────────────────────────────────────────────
+    ## R^2                             0.047           0.057      
+    ## Adj. R^2                        0.047           0.056      
+    ## Num. obs.                    5666            5666          
+    ## ───────────────────────────────────────────────────────────
     ## Note. * p < .05, ** p < .01, *** p < .001.
     ## 
     ## ************ PART 2. Mediation/Moderation Effect Estimate ************
     ## 
     ## Package Use : ‘interactions’ (v1.2.0)
     ## Effect Type : Simple Moderation (Model 1)
-    ## Sample Size : 5635
+    ## Sample Size : 5666
     ## Random Seed : -
     ## Simulations : -
     ## 
@@ -667,16 +654,17 @@ PROCESS(new_dataset, y = "MOB_EXPECT", x = "SAT_composite", mods = c("SEX"))
     ## ────────────────────────────────────────────
     ##                         F df1  df2     p    
     ## ────────────────────────────────────────────
-    ## SAT_composite * SEX  6.75   1 5631  .009 ** 
+    ## SAT_composite * SEX  4.66   2 5660  .010 ** 
     ## ────────────────────────────────────────────
     ## 
     ## Simple Slopes: "SAT_composite" (X) ==> "MOB_EXPECT" (Y)
-    ## ────────────────────────────────────────────────────────
-    ##  "SEX" Effect    S.E.       t     p             [95% CI]
-    ## ────────────────────────────────────────────────────────
-    ##  1.000 -0.343 (0.034) -10.015 <.001 *** [-0.411, -0.276]
-    ##  2.000 -0.470 (0.035) -13.609 <.001 *** [-0.537, -0.402]
-    ## ────────────────────────────────────────────────────────
+    ## ─────────────────────────────────────────────────────────────
+    ##  "SEX"      Effect    S.E.       t     p             [95% CI]
+    ## ─────────────────────────────────────────────────────────────
+    ##  (1) Male   -0.343 (0.034) -10.009 <.001 *** [-0.411, -0.276]
+    ##  (2) Female -0.470 (0.035) -13.600 <.001 *** [-0.537, -0.402]
+    ##  (3) Other   0.061 (0.290)   0.212  .832     [-0.507,  0.630]
+    ## ─────────────────────────────────────────────────────────────
 
 ``` r
 PROCESS(new_dataset, y = "MOB_EXPECT", x = "RES_composite", mods = c("SEX"))
@@ -708,29 +696,33 @@ PROCESS(new_dataset, y = "MOB_EXPECT", x = "RES_composite", mods = c("SEX"))
     ##   
     ## Model Summary
     ## 
-    ## ─────────────────────────────────────────────────
-    ##                    (1) MOB_EXPECT  (2) MOB_EXPECT
-    ## ─────────────────────────────────────────────────
-    ## (Intercept)           1.593 ***       1.585 ***  
-    ##                      (0.024)         (0.024)     
-    ## RES_composite        -0.186 ***      -0.161 ***  
-    ##                      (0.029)         (0.029)     
-    ## SEX                                   0.306 ***  
-    ##                                      (0.048)     
-    ## RES_composite:SEX                    -0.129 *    
-    ##                                      (0.058)     
-    ## ─────────────────────────────────────────────────
-    ## R^2                   0.007           0.015      
-    ## Adj. R^2              0.007           0.015      
-    ## Num. obs.          5635            5635          
-    ## ─────────────────────────────────────────────────
+    ## ───────────────────────────────────────────────────────────
+    ##                              (1) MOB_EXPECT  (2) MOB_EXPECT
+    ## ───────────────────────────────────────────────────────────
+    ## (Intercept)                     1.596 ***       1.430 ***  
+    ##                                (0.024)         (0.034)     
+    ## RES_composite                  -0.189 ***      -0.095 *    
+    ##                                (0.028)         (0.041)     
+    ## SEX(2) Female                                   0.307 ***  
+    ##                                                (0.048)     
+    ## SEX(3) Other                                    0.526      
+    ##                                                (0.409)     
+    ## RES_composite:SEX(2) Female                    -0.129 *    
+    ##                                                (0.058)     
+    ## RES_composite:SEX(3) Other                     -0.252      
+    ##                                                (0.372)     
+    ## ───────────────────────────────────────────────────────────
+    ## R^2                             0.008           0.016      
+    ## Adj. R^2                        0.008           0.015      
+    ## Num. obs.                    5666            5666          
+    ## ───────────────────────────────────────────────────────────
     ## Note. * p < .05, ** p < .01, *** p < .001.
     ## 
     ## ************ PART 2. Mediation/Moderation Effect Estimate ************
     ## 
     ## Package Use : ‘interactions’ (v1.2.0)
     ## Effect Type : Simple Moderation (Model 1)
-    ## Sample Size : 5635
+    ## Sample Size : 5666
     ## Random Seed : -
     ## Simulations : -
     ## 
@@ -738,39 +730,69 @@ PROCESS(new_dataset, y = "MOB_EXPECT", x = "RES_composite", mods = c("SEX"))
     ## ────────────────────────────────────────────
     ##                         F df1  df2     p    
     ## ────────────────────────────────────────────
-    ## RES_composite * SEX  5.04   1 5631  .025 *  
+    ## RES_composite * SEX  2.65   2 5660  .071 .  
     ## ────────────────────────────────────────────
     ## 
     ## Simple Slopes: "RES_composite" (X) ==> "MOB_EXPECT" (Y)
-    ## ───────────────────────────────────────────────────────
-    ##  "SEX" Effect    S.E.      t     p             [95% CI]
-    ## ───────────────────────────────────────────────────────
-    ##  1.000 -0.095 (0.041) -2.311  .021 *   [-0.176, -0.014]
-    ##  2.000 -0.224 (0.040) -5.573 <.001 *** [-0.303, -0.145]
-    ## ───────────────────────────────────────────────────────
+    ## ────────────────────────────────────────────────────────────
+    ##  "SEX"      Effect    S.E.      t     p             [95% CI]
+    ## ────────────────────────────────────────────────────────────
+    ##  (1) Male   -0.095 (0.041) -2.310  .021 *   [-0.176, -0.014]
+    ##  (2) Female -0.224 (0.040) -5.571 <.001 *** [-0.303, -0.145]
+    ##  (3) Other  -0.347 (0.370) -0.938  .348     [-1.072,  0.378]
+    ## ────────────────────────────────────────────────────────────
 
 ``` r
 plot<-summarySE(new_dataset, measurevar="MOB_EXPECT", groupvars=c("SEX", "SAT_composite"))
+```
 
+    ## Warning in qt(conf.interval/2 + 0.5, datac$N - 1): NaNs produced
 
+``` r
+as.factor
+```
+
+    ## function (x) 
+    ## {
+    ##     if (is.factor(x)) 
+    ##         x
+    ##     else if (!is.object(x) && is.integer(x)) {
+    ##         levels <- sort.int(unique.default(x))
+    ##         f <- match(x, levels)
+    ##         levels(f) <- as.character(levels)
+    ##         if (!is.null(nx <- names(x))) 
+    ##             names(f) <- nx
+    ##         class(f) <- "factor"
+    ##         f
+    ##     }
+    ##     else factor(x)
+    ## }
+    ## <bytecode: 0x0000023f0ed886c0>
+    ## <environment: namespace:base>
+
+``` r
 ggplot(plot, aes(x = SAT_composite, y = MOB_EXPECT)) +
-  geom_smooth(method = lm) + geom_point() + facet_wrap(~ SEX) + theme_bruce()
+ geom_smooth(method = lm) + geom_point() + facet_wrap(~ SEX) + theme_bruce()
 ```
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](MyProject_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+![](MyProject_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
 ``` r
 plot<-summarySE(new_dataset, measurevar="MOB_EXPECT", groupvars=c("SEX", "RES_composite"))
+```
 
+    ## Warning in qt(conf.interval/2 + 0.5, datac$N - 1): NaNs produced
+
+``` r
 ggplot(plot, aes(x = RES_composite, y = MOB_EXPECT)) +
-  geom_smooth(method = lm) + geom_point() + facet_wrap(~ SEX) + theme_bruce()
+ geom_smooth(method = lm) + geom_point() + facet_wrap(~ SEX) + theme_bruce()
 ```
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-![](MyProject_files/figure-gfm/unnamed-chunk-22-2.png)<!-- -->
+![](MyProject_files/figure-gfm/unnamed-chunk-21-2.png)<!-- -->
 
 ``` r
 Alpha(da38964.0001, "SAT", c("1", "2", "3", "4", "5"))
@@ -881,7 +903,7 @@ EFA(da38964.0001, "SAT", 1:5, method = "pa", plot.scree = TRUE, nfactors = c("pa
     ## Communality = Sum of Squared (SS) Factor Loadings
     ## (Uniqueness = 1 - Communality)
 
-![](MyProject_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+![](MyProject_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
 
 ``` r
 EFA(da38964.0001, "RES", 1:6, rev = c("RES2", "RES4", "RES6"), method = "pa", plot.scree = TRUE, nfactors = c("parallel"))
@@ -931,4 +953,366 @@ EFA(da38964.0001, "RES", 1:6, rev = c("RES2", "RES4", "RES6"), method = "pa", pl
     ## Communality = Sum of Squared (SS) Factor Loadings
     ## (Uniqueness = 1 - Communality)
 
+![](MyProject_files/figure-gfm/unnamed-chunk-23-2.png)<!-- -->
+
+``` r
+model<-lm(SAT_composite ~ MOB_EXPECT + RES_composite, data = new_dataset)
+
+check_model(model)
+```
+
+![](MyProject_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+
+``` r
+model_summary(model)
+```
+
+    ## 
+    ## Model Summary
+    ## 
+    ## ────────────────────────────────
+    ##                (1) SAT_composite
+    ## ────────────────────────────────
+    ## (Intercept)       1.553 ***     
+    ##                  (0.046)        
+    ## MOB_EXPECT       -0.096 ***     
+    ##                  (0.006)        
+    ## RES_composite     0.478 ***     
+    ##                  (0.014)        
+    ## ────────────────────────────────
+    ## R^2               0.220         
+    ## Adj. R^2          0.220         
+    ## Num. obs.      5666             
+    ## ────────────────────────────────
+    ## Note. * p < .05, ** p < .01, *** p < .001.
+    ## 
+    ## # Check for Multicollinearity
+    ## 
+    ## Low Correlation
+    ## 
+    ##           Term  VIF   VIF 95% CI Increased SE Tolerance Tolerance 95% CI
+    ##     MOB_EXPECT 1.01 [1.00, 1.23]         1.00      0.99     [0.81, 1.00]
+    ##  RES_composite 1.01 [1.00, 1.23]         1.00      0.99     [0.81, 1.00]
+
+``` r
+tab_model(model)
+```
+
+<table style="border-collapse:collapse; border:none;">
+<tr>
+<th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; ">
+ 
+</th>
+<th colspan="3" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+SAT_composite
+</th>
+</tr>
+<tr>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  text-align:left; ">
+Predictors
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+Estimates
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+p
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+(Intercept)
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+1.55
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+1.46 – 1.64
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>\<0.001</strong>
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+MOB EXPECT
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.10
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-0.11 – -0.08
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>\<0.001</strong>
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+RES composite
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.48
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.45 – 0.50
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>\<0.001</strong>
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;">
+Observations
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="3">
+5666
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+R<sup>2</sup> / R<sup>2</sup> adjusted
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+0.220 / 0.220
+</td>
+</tr>
+</table>
+
+``` r
+plot_model(model,  type ="est",  show.values = TRUE, vline.color = "#1B191999", line.size = 1.5, dot.size = 2.5, colors = "blue") + theme_bruce()
+```
+
 ![](MyProject_files/figure-gfm/unnamed-chunk-24-2.png)<!-- -->
+
+``` r
+plot1 <- summarySE(new_dataset, measurevar = "SAT_composite", groupvars = c("SEX", "MOB_EXPECT"))
+```
+
+    ## Warning in qt(conf.interval/2 + 0.5, datac$N - 1): NaNs produced
+
+``` r
+ggplot(plot1, aes(x = MOB_EXPECT, y = SAT_composite)) +
+  geom_smooth(method = "lm") + 
+  geom_point() + 
+  facet_wrap(~ SEX) + 
+  theme_get() +
+  scale_x_continuous(name = "Social Mobility Expectations") +  # Rename x-axis
+  scale_y_continuous(name = "Life Satisfaction") + # Rename y-axis
+  theme(
+    axis.title.x = element_text(color = "darkred", size = 16, family = "Arial", face = "italic"),
+    axis.title.y = element_text(color = "darkred", size = 16, family = "Arial", face = "italic")
+  )
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+    ## Warning in grid.Call(C_stringMetric, as.graphicsAnnot(x$label)): font family
+    ## not found in Windows font database
+
+    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+    ## family not found in Windows font database
+
+    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+    ## font family not found in Windows font database
+    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+    ## font family not found in Windows font database
+
+![](MyProject_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+
+``` r
+plot2 <- summarySE(new_dataset, measurevar = "SAT_composite", groupvars = c("SEX", "RES_composite"))
+```
+
+    ## Warning in qt(conf.interval/2 + 0.5, datac$N - 1): NaNs produced
+
+``` r
+ggplot(plot2, aes(x = RES_composite, y = SAT_composite)) +
+  geom_smooth(method = "lm") + 
+  geom_point() + 
+  facet_wrap(~ SEX) + 
+  theme_sjplot() +
+  scale_x_continuous(name = "Resilience") + 
+  scale_y_continuous(name = "Life Satisfaction") +  
+  theme(
+    axis.title.x = element_text(color = "darkred", size = 16, family = "Arial", face = "italic"),
+    axis.title.y = element_text(color = "darkred", size = 16, family = "Arial", face = "italic")
+  )
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+    ## family not found in Windows font database
+    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+    ## family not found in Windows font database
+    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+    ## family not found in Windows font database
+
+![](MyProject_files/figure-gfm/unnamed-chunk-25-2.png)<!-- -->
+
+``` r
+sum(is.na(new_dataset$RES_composite))
+```
+
+    ## [1] 0
+
+``` r
+colnames(new_dataset)
+```
+
+    ## [1] "SAT_composite" "MOB_EXPECT"    "RES_composite" "SEX"
+
+``` r
+PROCESS(new_dataset, y = "SAT_composite", x = "MOB_EXPECT", mods = c("SEX"))
+```
+
+    ## 
+    ## ****************** PART 1. Regression Model Summary ******************
+    ## 
+    ## PROCESS Model Code : 1 (Hayes, 2018; www.guilford.com/p/hayes3)
+    ## PROCESS Model Type : Simple Moderation
+    ## -    Outcome (Y) : SAT_composite
+    ## -  Predictor (X) : MOB_EXPECT
+    ## -  Mediators (M) : -
+    ## - Moderators (W) : SEX
+    ## - Covariates (C) : -
+    ## -   HLM Clusters : -
+    ## 
+    ## All numeric predictors have been grand-mean centered.
+    ## (For details, please see the help page of PROCESS.)
+    ## 
+    ## Formula of Outcome:
+    ## -    SAT_composite ~ MOB_EXPECT*SEX
+    ## 
+    ## CAUTION:
+    ##   Fixed effect (coef.) of a predictor involved in an interaction
+    ##   denotes its "simple effect/slope" at the other predictor = 0.
+    ##   Only when all predictors in an interaction are mean-centered
+    ##   can the fixed effect denote the "main effect"!
+    ##   
+    ## Model Summary
+    ## 
+    ## ──────────────────────────────────────────────────────────────
+    ##                           (1) SAT_composite  (2) SAT_composite
+    ## ──────────────────────────────────────────────────────────────
+    ## (Intercept)                  2.924 ***          2.924 ***     
+    ##                             (0.012)            (0.018)        
+    ## MOB_EXPECT                  -0.115 ***         -0.109 ***     
+    ##                             (0.007)            (0.010)        
+    ## SEX(2) Female                                   0.005         
+    ##                                                (0.025)        
+    ## SEX(3) Other                                   -0.504 **      
+    ##                                                (0.176)        
+    ## MOB_EXPECT:SEX(2) Female                       -0.013         
+    ##                                                (0.014)        
+    ## MOB_EXPECT:SEX(3) Other                         0.129         
+    ##                                                (0.090)        
+    ## ──────────────────────────────────────────────────────────────
+    ## R^2                          0.047              0.049         
+    ## Adj. R^2                     0.047              0.048         
+    ## Num. obs.                 5666               5666             
+    ## ──────────────────────────────────────────────────────────────
+    ## Note. * p < .05, ** p < .01, *** p < .001.
+    ## 
+    ## ************ PART 2. Mediation/Moderation Effect Estimate ************
+    ## 
+    ## Package Use : ‘interactions’ (v1.2.0)
+    ## Effect Type : Simple Moderation (Model 1)
+    ## Sample Size : 5666
+    ## Random Seed : -
+    ## Simulations : -
+    ## 
+    ## Interaction Effect on "SAT_composite" (Y)
+    ## ─────────────────────────────────────────
+    ##                      F df1  df2     p    
+    ## ─────────────────────────────────────────
+    ## MOB_EXPECT * SEX  1.59   2 5660  .204    
+    ## ─────────────────────────────────────────
+    ## 
+    ## Simple Slopes: "MOB_EXPECT" (X) ==> "SAT_composite" (Y)
+    ## ─────────────────────────────────────────────────────────────
+    ##  "SEX"      Effect    S.E.       t     p             [95% CI]
+    ## ─────────────────────────────────────────────────────────────
+    ##  (1) Male   -0.109 (0.010) -10.538 <.001 *** [-0.129, -0.089]
+    ##  (2) Female -0.122 (0.009) -12.948 <.001 *** [-0.140, -0.103]
+    ##  (3) Other   0.020 (0.089)   0.227  .820     [-0.155,  0.195]
+    ## ─────────────────────────────────────────────────────────────
+
+``` r
+PROCESS(new_dataset, y = "SAT_composite", x = "RES_composite", mods = c("SEX"))
+```
+
+    ## 
+    ## ****************** PART 1. Regression Model Summary ******************
+    ## 
+    ## PROCESS Model Code : 1 (Hayes, 2018; www.guilford.com/p/hayes3)
+    ## PROCESS Model Type : Simple Moderation
+    ## -    Outcome (Y) : SAT_composite
+    ## -  Predictor (X) : RES_composite
+    ## -  Mediators (M) : -
+    ## - Moderators (W) : SEX
+    ## - Covariates (C) : -
+    ## -   HLM Clusters : -
+    ## 
+    ## All numeric predictors have been grand-mean centered.
+    ## (For details, please see the help page of PROCESS.)
+    ## 
+    ## Formula of Outcome:
+    ## -    SAT_composite ~ RES_composite*SEX
+    ## 
+    ## CAUTION:
+    ##   Fixed effect (coef.) of a predictor involved in an interaction
+    ##   denotes its "simple effect/slope" at the other predictor = 0.
+    ##   Only when all predictors in an interaction are mean-centered
+    ##   can the fixed effect denote the "main effect"!
+    ##   
+    ## Model Summary
+    ## 
+    ## ─────────────────────────────────────────────────────────────────
+    ##                              (1) SAT_composite  (2) SAT_composite
+    ## ─────────────────────────────────────────────────────────────────
+    ## (Intercept)                     2.924 ***          2.880 ***     
+    ##                                (0.011)            (0.016)        
+    ## RES_composite                   0.497 ***          0.544 ***     
+    ##                                (0.014)            (0.020)        
+    ## SEX(2) Female                                      0.078 ***     
+    ##                                                   (0.023)        
+    ## SEX(3) Other                                      -0.166         
+    ##                                                   (0.197)        
+    ## RES_composite:SEX(2) Female                       -0.082 **      
+    ##                                                   (0.028)        
+    ## RES_composite:SEX(3) Other                        -0.132         
+    ##                                                   (0.180)        
+    ## ─────────────────────────────────────────────────────────────────
+    ## R^2                             0.188              0.191         
+    ## Adj. R^2                        0.188              0.190         
+    ## Num. obs.                    5666               5666             
+    ## ─────────────────────────────────────────────────────────────────
+    ## Note. * p < .05, ** p < .01, *** p < .001.
+    ## 
+    ## ************ PART 2. Mediation/Moderation Effect Estimate ************
+    ## 
+    ## Package Use : ‘interactions’ (v1.2.0)
+    ## Effect Type : Simple Moderation (Model 1)
+    ## Sample Size : 5666
+    ## Random Seed : -
+    ## Simulations : -
+    ## 
+    ## Interaction Effect on "SAT_composite" (Y)
+    ## ────────────────────────────────────────────
+    ##                         F df1  df2     p    
+    ## ────────────────────────────────────────────
+    ## RES_composite * SEX  4.44   2 5660  .012 *  
+    ## ────────────────────────────────────────────
+    ## 
+    ## Simple Slopes: "RES_composite" (X) ==> "SAT_composite" (Y)
+    ## ──────────────────────────────────────────────────────────
+    ##  "SEX"      Effect    S.E.      t     p           [95% CI]
+    ## ──────────────────────────────────────────────────────────
+    ##  (1) Male    0.544 (0.020) 27.393 <.001 *** [0.505, 0.583]
+    ##  (2) Female  0.463 (0.019) 23.796 <.001 *** [0.425, 0.501]
+    ##  (3) Other   0.412 (0.179)  2.306  .021 *   [0.062, 0.762]
+    ## ──────────────────────────────────────────────────────────

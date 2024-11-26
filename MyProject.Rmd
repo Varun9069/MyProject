@@ -28,6 +28,7 @@ load("C:/Users/vtrip/OneDrive/Desktop/ICPSR_38964/DS0001/38964-0001-Data.rda")
 new_dataset <- da38964.0001 %>%
   select(RES1, RES2, RES3, RES4, RES5, RES5, RES6, SAT1, SAT2, SAT3, SAT4, SAT5, SEX, LAD_NOW, LAD_FUT)
 
+summary(new_dataset$SEX)
 
 ```
 
@@ -35,20 +36,6 @@ new_dataset <- da38964.0001 %>%
 ```{r}
 
 
-#new_dataset<- new_dataset %>%
-#  mutate(gender_recode = case_when(
-#    SEX == "(1) Male" ~  '1',
-#    SEX == "(2) Female" ~ "2"
-#    ))
-
-```
-
-
-```{r}
-new_dataset$SEX <- as.numeric(new_dataset$SEX)
-
-new_dataset <- new_dataset %>%
-  filter(SEX < 3)
 
 new_dataset$RES1 <- as.numeric(new_dataset$RES1)
   
@@ -313,7 +300,7 @@ ggcorrmat(new_dataset)
 ```{r}
 #Multiple regression
 
-model<-lm(MOB_EXPECT ~ SEX + SAT_composite + RES_composite, data = new_dataset)
+model<-lm(MOB_EXPECT ~ SAT_composite + RES_composite, data = new_dataset)
 
 check_model(model)
 
@@ -332,20 +319,21 @@ PROCESS(new_dataset, y = "MOB_EXPECT", x = "SAT_composite", mods = c("SEX"))
 
 PROCESS(new_dataset, y = "MOB_EXPECT", x = "RES_composite", mods = c("SEX"))
 
-
 ```
+
 ```{r}
 
 plot<-summarySE(new_dataset, measurevar="MOB_EXPECT", groupvars=c("SEX", "SAT_composite"))
 
+as.factor
 
 ggplot(plot, aes(x = SAT_composite, y = MOB_EXPECT)) +
-  geom_smooth(method = lm) + geom_point() + facet_wrap(~ SEX) + theme_bruce()
+ geom_smooth(method = lm) + geom_point() + facet_wrap(~ SEX) + theme_bruce()
 
 plot<-summarySE(new_dataset, measurevar="MOB_EXPECT", groupvars=c("SEX", "RES_composite"))
 
 ggplot(plot, aes(x = RES_composite, y = MOB_EXPECT)) +
-  geom_smooth(method = lm) + geom_point() + facet_wrap(~ SEX) + theme_bruce()
+ geom_smooth(method = lm) + geom_point() + facet_wrap(~ SEX) + theme_bruce()
 
 ```
 
@@ -358,5 +346,63 @@ Alpha(da38964.0001, "RES", 1:6, rev = c("RES2", "RES4", "RES6"))
 EFA(da38964.0001, "SAT", 1:5, method = "pa", plot.scree = TRUE, nfactors = c("parallel"))
 
 EFA(da38964.0001, "RES", 1:6, rev = c("RES2", "RES4", "RES6"), method = "pa", plot.scree = TRUE, nfactors = c("parallel"))
+```
+```{r}
+
+model<-lm(SAT_composite ~ MOB_EXPECT + RES_composite, data = new_dataset)
+
+check_model(model)
+
+model_summary(model)
+
+tab_model(model)
+
+plot_model(model,  type ="est",  show.values = TRUE, vline.color = "#1B191999", line.size = 1.5, dot.size = 2.5, colors = "blue") + theme_bruce()
+
+
+```
+```{r}
+
+plot1 <- summarySE(new_dataset, measurevar = "SAT_composite", groupvars = c("SEX", "MOB_EXPECT"))
+
+ggplot(plot1, aes(x = MOB_EXPECT, y = SAT_composite)) +
+  geom_smooth(method = "lm") + 
+  geom_point() + 
+  facet_wrap(~ SEX) + 
+  theme_get() +
+  scale_x_continuous(name = "Social Mobility Expectations") +  # Rename x-axis
+  scale_y_continuous(name = "Life Satisfaction") + # Rename y-axis
+  theme(
+    axis.title.x = element_text(color = "darkred", size = 16, family = "Arial", face = "italic"),
+    axis.title.y = element_text(color = "darkred", size = 16, family = "Arial", face = "italic")
+  )
+  
+ 
+
+plot2 <- summarySE(new_dataset, measurevar = "SAT_composite", groupvars = c("SEX", "RES_composite"))
+
+ggplot(plot2, aes(x = RES_composite, y = SAT_composite)) +
+  geom_smooth(method = "lm") + 
+  geom_point() + 
+  facet_wrap(~ SEX) + 
+  theme_sjplot() +
+  scale_x_continuous(name = "Resilience") + 
+  scale_y_continuous(name = "Life Satisfaction") +  
+  theme(
+    axis.title.x = element_text(color = "darkred", size = 16, family = "Arial", face = "italic"),
+    axis.title.y = element_text(color = "darkred", size = 16, family = "Arial", face = "italic")
+  )
+  
+
+```
+```{r}
+sum(is.na(new_dataset$RES_composite))
+
+colnames(new_dataset)
+
+PROCESS(new_dataset, y = "SAT_composite", x = "MOB_EXPECT", mods = c("SEX"))
+
+PROCESS(new_dataset, y = "SAT_composite", x = "RES_composite", mods = c("SEX"))
+
 ```
 
